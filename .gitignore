@@ -102,7 +102,3 @@ ENV/
 
 # Local settings
 karaoke/settings_local.py
-/keyrings/live/pubring.gpg~
-/keyrings/live/pubring.kbx~
-/keyrings/live/secring.gpg
-/karaoke/settings_local.py
