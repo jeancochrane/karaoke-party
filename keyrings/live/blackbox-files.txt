@@ -1,1 +1,0 @@
-karaoke/settings_local.py
