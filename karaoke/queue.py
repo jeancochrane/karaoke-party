@@ -9,7 +9,7 @@ class Queue(object):
         '''
         Return the item on the top of the queue.
         '''
-        return (singer, queue_id, url)
+        return (singer, url, queue_id)
 
     def delete(self, queue_id):
         '''

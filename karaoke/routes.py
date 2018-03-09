@@ -29,19 +29,28 @@ def queue():
 
     if request.method == 'GET':
         # Get next song from the queue
-        singer, queue_id, url = queue.get()
+        singer, song_id, queue_id = queue.get()
         status = 200
-        response = {'status': 'fetched next song', 'singer': singer, 'url': url}
+        response = {'status': 'fetched next song',
+                    'singer': singer,
+                    'song_id': song_id,
+                    'queue_id': queue_id}
 
     elif request.method == 'POST':
         # Check if the app is deleting a song that has just been played
         if request.args.get('delete'):
-            queue_id = request.args.get('id')
+            queue_id = request.args.get('queue_id')
 
             if queue_id:
-                queue.delete(queue_id)
-                status = 200
-                response = {'status': 'deleted song with queue id %s' % queue_id}
+                try:
+                    queue.delete(queue_id)
+                except QueueDeletionError:
+                    status = 403
+                    response = {'status': 'an item was not found on the queue with the id %s' % queue_id}
+                else:
+                    status = 200
+                    response = {'status': 'deleted song with queue id %s' % queue_id,
+                                'queue_id': queue_id}
             else:
                 status = 403
                 response = {'status': 'a `delete` request requires an `id` parameter'}
@@ -51,9 +60,9 @@ def queue():
             song_id = request.form.get('song_id')
 
             if singer and song_id:
-                queue.add(singer, song_id)
+                queue_id = queue.add(singer, song_id)
                 status = 200
-                response = {'status': 'added song to queue'}
+                response = {'status': 'added song to queue', 'queue_id': queue_id}
             else:
                 status = 403
                 response = {'status': 'an `add` request requires form data for a `singer` and `song_id`'}
