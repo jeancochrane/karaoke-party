@@ -1,6 +1,6 @@
 import psycopg2
 
-from karaoke import app
+from karaoke import app, get_db
 from karaoke.exceptions import QueueError
 
 class Queue(object):
@@ -11,8 +11,7 @@ class Queue(object):
         '''
         Open up a connection to the queue.
         '''
-        db_conn = app.config['DB_CONN']
-        self.conn = psycopg2.connect(**DB_CONN)
+        self.conn = get_db()
 
     def get(self):
         '''
@@ -61,10 +60,28 @@ class Queue(object):
         '''
         Add a song to the queue.
         '''
+        with self.conn:
+            with self.conn.cursor() as curs:
+                curs.execute('''
+                    INSERT INTO queue
+                        (singer, song_id)
+                    VALUES
+                        (%s)
+                    RETURNING queue_id
+                    ''', (singer, song_id))
+
+                queue_id = curs.fetchone()
+
         return queue_id
 
     def purge(self):
         '''
         Remove all songs from the queue.
         '''
+        with self.conn:
+            with self.conn.cursor() as curs:
+                curs.execute('''
+                    DELETE FROM queue
+                ''')
+
         return True
