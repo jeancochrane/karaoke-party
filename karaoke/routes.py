@@ -3,6 +3,7 @@ from flask import request, render_template, make_response
 
 from karaoke import app
 from karaoke.queue import Queue
+from karaoke.exceptions import QueueError
 
 
 @app.route('/play', methods=['GET'])
@@ -44,7 +45,7 @@ def queue():
             if queue_id:
                 try:
                     queue.delete(queue_id)
-                except QueueDeletionError:
+                except QueueError:
                     status = 403
                     response = {'status': 'an item was not found on the queue with the id %s' % queue_id}
                 else:
