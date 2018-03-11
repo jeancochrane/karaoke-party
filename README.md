@@ -31,3 +31,16 @@ Make a Postgres database:
 ```
 createdb karaoke
 ```
+
+Create the tables:
+
+```
+export FLASK_APP=karaoke/__init__.py
+flask initdb
+```
+
+You're ready to start the server:
+
+```
+python runserver.py
+```
