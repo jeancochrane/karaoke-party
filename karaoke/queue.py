@@ -6,7 +6,7 @@ class Queue(object):
     '''
     A queue of songs and singers to be played.
     '''
-    def __init__(self, db_conn=None):
+    def __init__(self, db_conn):
         '''
         Open up a connection to the queue. `db_conn` should be a DBAPI connection
         object.

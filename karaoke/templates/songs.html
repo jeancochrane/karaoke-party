@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+    <body>
+        <form action="{{ url_for('queue') }}" method="post">
+            <div>
+                <label for="singer">Your name:</label>
+                <input type="text" id="singer" name="singer" />
+            </div>
+            <div>
+                <label for="song_id">Select a song:</label>
+                <select id="song_id" name="song_id">
+                    {% for song in songs %}
+                        <option value="{{ song.id }}">{{ song.title }} -- {{ song.artist }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="button">
+                <button type="submit">Add to queue</button>
+            </div>
+        </form>
+    </body>
+</html>

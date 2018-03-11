@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+    <body>
+        <div id="player"></div>
+        <script type="text/javascript">
+
+            var player;
+
+            // Called when the YouTube API is ready
+            function onYouTubeIframeAPIReady() {
+                player = new YT.Player('player', {
+                    height: '390', // default
+                    width: '640', // default
+                    videoId: '{{ song.id }}',
+                    events: {
+                        'onReady': onPlayerReady,
+                        'onStateChange': onPlayerStateChange
+                    }
+                });
+            }
+
+            // Called when the video player is ready
+            function onPlayerReady(event) {
+                var singer = '{{ song.singer }}',
+                    title = '{{ song.title }}',
+                    artist = '{{ song.artist }}';
+
+                announceSong(singer, title, artist);
+
+                // Tell the player to play the video
+                event.target.playVideo();
+            }
+
+            // Called when the video player's state changes
+            function onPlayerStateChange(event) {
+                if (event.data == YT.PlayerState.DONE) {
+                    // Get next video from the queue
+                    var nextSong;
+
+                    // Loop forever until another song shows up on the queue
+                    while (typeof(nextSong) === 'undefined') {
+                        nextSong = getNextSong();
+                    }
+
+                    announceSong(nextSong.singer, nextSong.title, nextSong.artist);
+
+                    // Update the player's video ID
+                    event.target.loadVideoById(nextSong.id);
+                }
+            }
+
+            function getNextSong() {
+                // Try to get the next song from the queue
+                var queued,
+                    nextSong;
+
+                // TODO: try to request next song from the queue
+
+                if (typeof(queued) !== undefined) {
+                    nextSong = {
+                        'singer': song.singer,
+                        'title': song.title,
+                        'artist': song.artist
+                    };
+                }
+
+                return nextSong;
+            }
+
+            function announceSong(singer, title, artist) {
+                // TODO: Announce the next singer
+            }
+
+        </script>
