@@ -1,17 +1,17 @@
 import psycopg2
 
-from karaoke import app, get_db
 from karaoke.exceptions import QueueError
 
 class Queue(object):
     '''
     A queue of songs and singers to be played.
     '''
-    def __init__(self):
+    def __init__(self, db_conn=None):
         '''
-        Open up a connection to the queue.
+        Open up a connection to the queue. `db_conn` should be a DBAPI connection
+        object.
         '''
-        self.conn = get_db()
+        self.conn = db_conn
 
     def get(self):
         '''
@@ -21,7 +21,7 @@ class Queue(object):
             with self.conn.cursor() as curs:
                 curs.execute('''
                     SELECT
-                        singer, song_id, queue_id
+                        singer, song_id, id
                     FROM queue
                     ORDER BY date_added DESC
                     LIMIT 1
@@ -30,8 +30,7 @@ class Queue(object):
                 res = curs.fetchone()
 
         if res:
-            singer, song_id, queue_id = res[:3]
-            return (singer, song_id, queue_id)
+            return res
         else:
             # Nothing on the queue
             return (None, None, None)
@@ -44,9 +43,9 @@ class Queue(object):
             with self.conn.cursor() as curs:
                 curs.execute('''
                     DELETE FROM queue
-                    WHERE queue_id = %s
-                    RETURNING queue_id
-                ''', queue_id)
+                    WHERE id = %s
+                    RETURNING id
+                ''', (queue_id,))
 
                 deleted = curs.fetchone()
 
@@ -66,22 +65,22 @@ class Queue(object):
                     INSERT INTO queue
                         (singer, song_id)
                     VALUES
-                        (%s)
-                    RETURNING queue_id
+                        (%s, %s)
+                    RETURNING id
                     ''', (singer, song_id))
 
-                queue_id = curs.fetchone()
+                queue_id = curs.fetchone()[0]
 
         return queue_id
 
-    def purge(self):
+    def flush(self):
         '''
         Remove all songs from the queue.
         '''
         with self.conn:
             with self.conn.cursor() as curs:
                 curs.execute('''
-                    DELETE FROM queue
+                    TRUNCATE queue
                 ''')
 
         return True

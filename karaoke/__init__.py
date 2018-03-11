@@ -2,14 +2,13 @@ import psycopg2 as pg
 import psycopg2.sql as sql
 from flask import Flask, g
 
+from karaoke.queue import Queue
+
 # Create an instance of the app
 app = Flask('karaoke')
 
 # Register configs
 app.config.from_object('karaoke.settings')
-
-# Import the routes
-from karaoke import routes
 
 # Database methods
 
@@ -92,3 +91,6 @@ def initdb_command():
     '''
     init_db()
     print('Initialized the database')
+
+# Import the routes
+from karaoke import routes
