@@ -12,5 +12,6 @@ addons:
   postgresql: '9.6'
 install:
 - pip install --upgrade pip
-- pip install --upgrade -r requirements.txt
-script: python -m unittest discover -s tests
+- pip install pipenv
+- pipenv install
+script: pipenv run python -m unittest discover -s tests
