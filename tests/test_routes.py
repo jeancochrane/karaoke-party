@@ -8,21 +8,12 @@ from karaoke.exceptions import QueueError
 import tests.env
 from tests.conftest import KaraokeTestCase
 
-
 # POST data fixture
 POST_DATA = {
     'singer': 'foo',
     'song_id': '1',
 }
 
-# Mock out the Queue API so we don't have to touch the database.
-DummyQueue = MagicMock(spec=Queue)
-DummyQueue.add.return_value = 1
-DummyQueue.get.return_value = (POST_DATA['singer'], POST_DATA['song_id'], 1)
-DummyQueue.delete.return_value = 1
-
-ErrorQueue = MagicMock(spec=Queue)
-ErrorQueue.delete.side_effect = QueueError
 
 class TestRoutes(KaraokeTestCase):
     '''
