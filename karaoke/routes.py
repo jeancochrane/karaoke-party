@@ -1,7 +1,9 @@
 # routes.py -- routes for the app
+import json
+
 from flask import request, render_template, make_response
 
-from karaoke import app
+from karaoke import app, get_db
 from karaoke.queue import Queue
 from karaoke.exceptions import QueueError
 
@@ -26,7 +28,7 @@ def queue():
     '''
     Get and post songs to a queue.
     '''
-    queue = Queue()
+    queue = Queue(get_db())
 
     if request.method == 'GET':
         # Get next song from the queue
@@ -44,14 +46,14 @@ def queue():
 
             if queue_id:
                 try:
-                    queue.delete(queue_id)
+                    deleted_id = queue.delete(queue_id)
                 except QueueError:
                     status = 403
                     response = {'status': 'an item was not found on the queue with the id %s' % queue_id}
                 else:
                     status = 200
-                    response = {'status': 'deleted song with queue id %s' % queue_id,
-                                'queue_id': queue_id}
+                    response = {'status': 'deleted song with queue id %s' % deleted_id,
+                                'queue_id': deleted_id}
             else:
                 status = 403
                 response = {'status': 'a `delete` request requires an `id` parameter'}
