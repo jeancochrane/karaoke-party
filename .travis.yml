@@ -11,7 +11,9 @@ cache: pip
 addons:
   postgresql: '9.6'
 install:
-- pip install --upgrade pip
-- pip install pipenv
-- pipenv install
+  - pip install --upgrade pip
+  - pip install pipenv
+  - pipenv install
+before_script:
+  - psql -U postgres -c "create database karaoke;"
 script: pipenv run python -m unittest discover -s tests
