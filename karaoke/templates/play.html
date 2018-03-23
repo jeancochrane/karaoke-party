@@ -1,74 +1,120 @@
 <!DOCTYPE html>
 <html>
     <body>
-        <div id="player"></div>
-        <script type="text/javascript">
+        <div id="player-container" stye="display:none">
+            <div id="player"></div>
+        </div>
+        <div id="loading">
+            <h2>Loading song from queue...</h2>
+        </div>
+        <div id="next-song" style="display:none"></div>
+    </body>
+</html>
 
-            var player;
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"
+        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+        crossorigin="anonymous"
+        type="text/javascript"></script>
+<script src="https://s.ytimg.com/yts/jsbin/www-widgetapi-vflCkIv2v/www-widgetapi.js"
+        type="text/javascript"></script>
+<script type="text/javascript">
 
-            // Called when the YouTube API is ready
-            function onYouTubeIframeAPIReady() {
-                player = new YT.Player('player', {
-                    height: '390', // default
-                    width: '640', // default
-                    videoId: '{{ song.id }}',
-                    events: {
-                        'onReady': onPlayerReady,
-                        'onStateChange': onPlayerStateChange
-                    }
-                });
+    $(document).ready(function() {
+
+        var song_id = '';
+
+        {% if song %}
+            song_id = '{{ song.id }}'
+        {% else %}
+            var song = pollQueue();
+            song_id = song.id;
+        {% endif %}
+
+        var player = new YT.Player('player', {
+            height: '100%', // default
+            width: '640', // default
+            videoId: song_id,
+            events: {
+                'onReady': onPlayerReady,
+                'onStateChange': onPlayerStateChange
             }
+        });
 
-            // Called when the video player is ready
-            function onPlayerReady(event) {
-                var singer = '{{ song.singer }}',
-                    title = '{{ song.title }}',
-                    artist = '{{ song.artist }}';
+        // Callback function fired when the video player is ready
+        function onPlayerReady(event) {
+            // Resize the player element
+            var windowHeight = $(window).outerHeight();
+            $('#player').width('100%');
+            $('#player').height(windowHeight);
 
-                announceSong(singer, title, artist);
+            $(window).resize(function() {
+                windowHeight = $(this).outerHeight();
+                $('#player').height(windowHeight);
+            });
 
-                // Tell the player to play the video
-                event.target.playVideo();
-            }
+            var singer = '{{ song.singer }}',
+                title = '{{ song.title }}';
 
-            // Called when the video player's state changes
-            function onPlayerStateChange(event) {
-                if (event.data == YT.PlayerState.DONE) {
-                    // Get next video from the queue
-                    var nextSong;
+            playSong(singer, title, song_id);
+        }
 
-                    // Loop forever until another song shows up on the queue
-                    while (typeof(nextSong) === 'undefined') {
-                        nextSong = getNextSong();
-                    }
+        // Called when the video player's state changes
+        function onPlayerStateChange(event) {
+            if (event.data == YT.PlayerState.DONE) {
+                // Get next video from the queue
+                var nextSong;
 
-                    announceSong(nextSong.singer, nextSong.title, nextSong.artist);
-
-                    // Update the player's video ID
-                    event.target.loadVideoById(nextSong.id);
+                // Loop forever until another song shows up on the queue
+                while (typeof(nextSong) === 'undefined') {
+                    nextSong = getNextSong();
                 }
+
+                playSong(nextSong.singer, nextSong.title, nextSong.id);
+            }
+        }
+
+        function getNextSong() {
+            // Try to get the next song from the queue
+            var queued,
+                nextSong;
+
+            // TODO: try to request next song from the queue
+
+            if (typeof(queued) !== undefined) {
+                nextSong = {
+                    'singer': song.singer,
+                    'title': song.title,
+                    'artist': song.artist
+                };
             }
 
-            function getNextSong() {
-                // Try to get the next song from the queue
-                var queued,
-                    nextSong;
+            return nextSong;
+        }
 
-                // TODO: try to request next song from the queue
+        function playSong(singer, title, song_id) {
+            // Announce the next singer and song with a full-screen card
+            $('#player,#loading').hide();
 
-                if (typeof(queued) !== undefined) {
-                    nextSong = {
-                        'singer': song.singer,
-                        'title': song.title,
-                        'artist': song.artist
-                    };
-                }
+            var songHtml = '<h2>Next up:</h2>' +
+                           '<h1>' + singer + '</h1>' +
+                           '<h3>performing</h3>' +
+                           '<h1>' + title + '</h1>';
 
-                return nextSong;
+            $('#next-song').html(songHtml);
+
+            $('#next-song').show();
+
+            function play() {
+                $('#next-song').hide()
+                $('#player').show();
+                // Update the player's video ID
+                player.loadVideoById(song_id);
+                player.playVideo();
             }
 
-            function announceSong(singer, title, artist) {
-                // TODO: Announce the next singer
-            }
+            window.setTimeout(play, 5000);
+        }
 
-        </script>
+    });
+
+</script>

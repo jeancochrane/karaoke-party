@@ -13,7 +13,13 @@ def play():
     '''
     Play videos off of a queue.
     '''
-    return render_template('play.html')
+    queue = Queue(get_db())
+    singer, song_id, queue_id = queue.get()
+    song = {'singer': singer, 'id': song_id}
+
+    # Override for dev
+    song = {'singer': 'jean', 'id': 't3bjPGUDl1k', 'title': 'Boyish by Japanese Breakfast'}
+    return render_template('play.html', song=song)
 
 
 @app.route('/songs', methods=['GET'])
